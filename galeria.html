@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Galería de Pareja</title>
+  <style>
+ 
+body {
+  margin: 0;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #f5f5f5;
+  min-height: 100vh;
+  text-align: center;
+  overflow-x: hidden;
+  background: linear-gradient(135deg, #0a0228, #200055, #783cc8);
+  animation: fondoAnimado 10s infinite alternate;
+}
+
+@keyframes fondoAnimado {
+  0% { background-position: left top; }
+  100% { background-position: right bottom; }
+}
+
+h1 {
+  margin-bottom: 25px;
+  font-weight: 700;
+  font-size: 2.4rem;
+  color: #ffcade;
+  text-shadow: 0 0 10px rgba(255, 188, 220, 0.9);
+}
+
+/* === Galería === */
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 18px;
+  max-width: 960px;
+  margin: 0 auto 35px;
+}
+
+.gallery-item {
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 5px 20px rgba(255, 182, 193, 0.35);
+  transition: transform 0.4s ease-out, box-shadow 0.4s ease-out;
+}
+
+.gallery-item:hover,
+.gallery-item:focus-visible {
+  transform: scale(1.08);
+  box-shadow: 0 12px 30px rgba(255, 105, 180, 0.6);
+  outline: none;
+}
+
+.gallery-item img,
+.gallery-item video {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1/1.2;
+  object-fit: cover;
+  border-radius: 12px;
+  display: block;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* === Icono de video === */
+.video-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #8b32c9cc;
+  color: #fff;
+  padding: 5px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 12px;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+}
+
+/* === Modal === */
+#modal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 80vw;
+  height: 80vh;
+  transform: translate(-50%, -50%);
+  background: rgba(15, 10, 40, 0.92);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: 0 0 30px rgba(255, 182, 193, 0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  padding: 25px;
+  box-sizing: border-box;
+  animation: fadeIn 0.5s ease-out;
+}
+
+#modal.active {
+  display: flex;
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+#modal-content {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+#modal-content img,
+#modal-content video {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(255, 182, 193, 0.5);
+  user-select: none;
+}
+
+/* === Botón de cerrar modal === */
+#modal-close {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #8b32c9;
+  border: none;
+  color: white;
+  font-size: 26px;
+  font-weight: 900;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  cursor: pointer;
+  box-shadow: 0 0 15px #ff89c9cc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.3s ease, transform 0.25s ease;
+  z-index: 10000;
+  user-select: none;
+}
+
+#modal-close:hover,
+#modal-close:focus {
+  background: #5a1f7d;
+  transform: scale(1.2);
+  outline: none;
+  box-shadow: 0 0 25px #ffb3d9cc;
+}
+
+/* === Botón volver === */
+#btn-back {
+  margin-top: 20px;
+  padding: 12px 30px;
+  font-size: 18px;
+  background: #8b32c9;
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
+  box-shadow: 0 0 20px #ff89c9cc;
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+#btn-back:hover,
+#btn-back:focus {
+  box-shadow: 0 0 30px #ffb3d9cc;
+  transform: scale(1.1);
+  outline: none;
+}
+/* Canvas de estrellas brillantes */
+#starCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    width: 100vw;
+    height: 100vh;
+    display: block;
+    pointer-events: none; 
+}
+  </style>
+</head>
+<body>
+  <canvas id="starCanvas"></canvas>
+  <h1>Galería de Momentos Juntos 💖</h1>
+
+ <div class="gallery" id="gallery">
+    <div class="gallery-item" data-type="image" data-src="foto2.jpg" tabindex="0">
+      <img src="foto2.jpg" alt="Foto 1" />
+    </div>
+    <div class="gallery-item" data-type="image" data-src="foto4.jpg" tabindex="0">
+      <img src="foto4.jpg" alt="Foto 2" />
+    </div>
+    <div class="gallery-item" data-type="image" data-src="foto5.jpg" tabindex="0">
+      <img src="foto5.jpg" alt="Foto 3" />
+    </div>
+    <div class="gallery-item" data-type="video" data-src="video2.mp4" tabindex="0">
+      <video src="video2.mp4" muted></video>
+    </div>
+  </div>
+
+
+  <button id="btn-back" title="Volver a la página anterior">Volver</button>
+
+  <div id="modal" role="dialog" aria-modal="true" aria-label="Galería ampliada">
+    <button id="modal-close" aria-label="Cerrar">&times;</button>
+    <div id="modal-content"></div>
+  </div>
+
+  <script>
+const gallery = document.getElementById('gallery');
+const modal = document.getElementById('modal');
+const modalContent = document.getElementById('modal-content');
+const modalClose = document.getElementById('modal-close');
+const btnBack = document.getElementById('btn-back');
+
+gallery.addEventListener('click', e => {
+  const target = e.target.closest('.gallery-item');
+  if (!target) return;
+
+  const type = target.getAttribute('data-type');
+  const src = target.getAttribute('data-src');
+  openModal(type, src);
+});
+
+gallery.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const target = e.target.closest('.gallery-item');
+    if (!target) return;
+
+    const type = target.getAttribute('data-type');
+    const src = target.getAttribute('data-src');
+    openModal(type, src);
+  }
+});
+
+function openModal(type, src) {
+
+  modalContent.innerHTML = '';
+
+  if (type === 'image') {
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = 'Foto ampliada';
+    img.style.maxWidth = '90vw';
+    img.style.maxHeight = '85vh';
+    img.style.objectFit = 'contain'; 
+    modalContent.appendChild(img);
+  } else if (type === 'video') {
+    const video = document.createElement('video');
+    video.src = src;
+    video.controls = true;
+    video.autoplay = true;
+    video.style.maxWidth = '90vw';
+    video.style.maxHeight = '85vh';
+    video.style.objectFit = 'contain';
+    modalContent.appendChild(video);
+  }
+
+  modal.classList.add('active');
+  modalClose.focus();
+}
+
+modalClose.addEventListener('click', () => {
+  modal.classList.remove('active');
+  modalContent.innerHTML = ''; 
+});
+
+modal.addEventListener('click', e => {
+  if (e.target === modal) {
+    modal.classList.remove('active');
+    modalContent.innerHTML = '';
+  }
+});
+
+window.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && modal.classList.contains('active')) {
+    modal.classList.remove('active');
+    modalContent.innerHTML = '';
+  }
+});
+
+btnBack.addEventListener('click', () => {
+  window.history.back();
+});
+
+// ✨ Estrellas brillantes
+const canvas = document.getElementById("starCanvas");
+const ctx = canvas.getContext("2d");
+
+let stars = [];
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  createStars();
+}
+
+window.addEventListener("resize", resizeCanvas);
+
+function createStars() {
+  stars = [];
+  const count = Math.floor((canvas.width * canvas.height) / 1200);
+  for (let i = 0; i < count; i++) {
+    stars.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      size: Math.random() * 3 + 1.5, // Tamaño más brillante
+      baseOpacity: Math.random() * 0.5 + 0.6,
+      speed: Math.random() * 0.015 + 0.003,
+      angle: Math.random() * Math.PI * 2,
+      driftX: (Math.random() - 0.5) * 0.3,
+      driftY: (Math.random() - 0.5) * 0.3
+    });
+  }
+}
+
+function drawStars() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  stars.forEach(star => {
+    star.angle += star.speed;
+    star.x += star.driftX;
+    star.y += star.driftY;
+
+    // 🌠 Reaparece por el otro lado si sale
+    if (star.x < 0) star.x = canvas.width;
+    if (star.x > canvas.width) star.x = 0;
+    if (star.y < 0) star.y = canvas.height;
+    if (star.y > canvas.height) star.y = 0;
+
+    const opacity = star.baseOpacity + Math.sin(star.angle) * 0.5;
+    ctx.globalAlpha = Math.min(Math.max(opacity, 0), 1);
+
+    // 🌌 Gradiente brillante para las estrellas
+    const gradient = ctx.createRadialGradient(
+      star.x, star.y, 0,
+      star.x, star.y, star.size
+    );
+    gradient.addColorStop(0, "rgba(255, 255, 255, 1)");
+    gradient.addColorStop(0.5, "rgba(255, 255, 255, 0.5)");
+    gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+
+    ctx.beginPath();
+    ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+    ctx.fillStyle = gradient;
+    ctx.shadowBlur = 30;
+    ctx.shadowColor = "white";
+    ctx.fill();
+  });
+  requestAnimationFrame(drawStars);
+}
+
+resizeCanvas();
+drawStars();
+  </script>
+</body>
+</html>

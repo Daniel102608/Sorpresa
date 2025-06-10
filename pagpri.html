@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tu Sorpresa Especial</title>
+    <style>
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, rgba(10, 2, 40, 1), rgba(32, 0, 85, 0.95), rgba(120, 60, 200, 0.85));
+    color: white;
+    text-align: center;
+    position: relative;
+}
+
+/* Contenedor del body */
+body {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    z-index: 1;
+}
+
+.container {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 25px 30px;
+    border-radius: 15px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.25);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 90vw;
+    z-index: 2;
+}
+
+h1 {
+    font-size: 2.2rem;
+    text-shadow: 2px 2px 12px rgba(200, 200, 255, 0.9);
+}
+
+
+.buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-top: 25px;
+}
+
+
+button {
+    font-size: 1.3rem;
+    padding: 12px 24px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.3s, background 0.3s, box-shadow 0.3s;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+button:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+}
+
+/* Canvas de estrellas brillantes */
+#starCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    width: 100vw;
+    height: 100vh;
+    display: block;
+    pointer-events: none; /* Evita que interfiera con clics */
+}
+
+    </style>
+</head>
+<body>
+    <canvas id="starCanvas"></canvas>
+
+    <div class="container">
+        <h1>🌸 Bienvenida a tu sorpresa 🌸</h1>
+        <p>Elige el que deseas :</p>
+
+        <div class="buttons">
+            <button id="message">💌 Mensaje</button>
+            <button id="gallery">🖼️ Galería</button>
+            <button id="music">🎵 Música</button>
+            <button id="tetris">🎮 Juego</button>
+        </div>
+    </div>
+
+    <script>
+document.addEventListener("DOMContentLoaded", function () {
+    // 🌟 Mejora de animación en botones
+    function animateButton(button) {
+        button.style.transition = "transform 0.3s ease, box-shadow 0.3s ease";
+        button.style.transform = "scale(1.1)";
+        button.style.boxShadow = "0px 0px 20px rgba(255, 0, 255, 0.6)";
+        setTimeout(() => {
+            button.style.transform = "scale(1)";
+            button.style.boxShadow = "none";
+        }, 300);
+    }
+
+    // 🎮 Botones de navegación
+    const buttons = {
+        message: "mensaje.html",
+        gallery: "galeria.html",
+        music: "musica.html",
+        tetris: "rompecabezas.html"
+    };
+
+    Object.keys(buttons).forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+            btn.addEventListener("click", function () {
+                animateButton(this);
+                setTimeout(() => {
+                    window.location.href = buttons[id];
+                }, 500);
+            });
+        }
+    });
+
+    // ✨ Estrellas brillantes
+    const canvas = document.getElementById("starCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let stars = [];
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        createStars();
+    }
+
+    window.addEventListener("resize", resizeCanvas);
+
+    function createStars() {
+        stars = [];
+        const count = Math.floor((canvas.width * canvas.height) / 1200);
+        for (let i = 0; i < count; i++) {
+            stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 3 + 1.5, // Tamaño más brillante
+                baseOpacity: Math.random() * 0.5 + 0.6,
+                speed: Math.random() * 0.015 + 0.003,
+                angle: Math.random() * Math.PI * 2,
+                driftX: (Math.random() - 0.5) * 0.3,
+                driftY: (Math.random() - 0.5) * 0.3
+            });
+        }
+    }
+
+    function drawStars() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        stars.forEach(star => {
+            star.angle += star.speed;
+            star.x += star.driftX;
+            star.y += star.driftY;
+
+            // 🌠 Reaparece por el otro lado si sale
+            if (star.x < 0) star.x = canvas.width;
+            if (star.x > canvas.width) star.x = 0;
+            if (star.y < 0) star.y = canvas.height;
+            if (star.y > canvas.height) star.y = 0;
+
+            const opacity = star.baseOpacity + Math.sin(star.angle) * 0.5;
+            ctx.globalAlpha = Math.min(Math.max(opacity, 0), 1);
+
+            // 🌌 Gradiente brillante para las estrellas
+            const gradient = ctx.createRadialGradient(
+                star.x, star.y, 0,
+                star.x, star.y, star.size
+            );
+            gradient.addColorStop(0, "rgba(255, 255, 255, 1)");
+            gradient.addColorStop(0.5, "rgba(255, 255, 255, 0.5)");
+            gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+
+            ctx.beginPath();
+            ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+            ctx.fillStyle = gradient;
+            ctx.shadowBlur = 30;
+            ctx.shadowColor = "white";
+            ctx.fill();
+        });
+        requestAnimationFrame(drawStars);
+    }
+
+    resizeCanvas();
+    drawStars();
+});
+    </script>
+</body>
+</html>
+
+

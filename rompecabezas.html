@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Rompecabezas de Amor</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      overflow: hidden;
+      background: linear-gradient(135deg, rgba(10, 2, 40, 1), rgba(32, 0, 85, 0.95), rgba(120, 60, 200, 0.85));
+    }
+
+    h1 {
+      color: white;
+      margin-top: 20px;
+      text-shadow: 1px 1px 3px black;
+    }
+
+    #puzzleBoard {
+      display: grid;
+      grid-template-columns: repeat(6, 100px);
+      grid-template-rows: repeat(6, 100px);
+      gap: 2px;
+      margin: 20px auto;
+      width: 604px;
+    }
+
+    .puzzle-piece {
+      width: 100px;
+      height: 100px;
+      border: 1px solid #ccc;
+      background-repeat: no-repeat;
+      cursor: grab;
+    }
+
+    #imageModal {
+      display: none;
+      position: fixed;
+      z-index: 10;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      justify-content: center;
+      align-items: center;
+    }
+
+    #imageModal img {
+      max-width: 90%;
+      max-height: 90%;
+    }
+
+    .close {
+      position: absolute;
+      top: 20px;
+      right: 40px;
+      font-size: 30px;
+      color: white;
+      cursor: pointer;
+    }
+
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      background: #6a0dad;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #5100a0;
+    }
+    /* Canvas de estrellas brillantes */
+#starCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    width: 100vw;
+    height: 100vh;
+    display: block;
+    pointer-events: none; 
+}
+  </style>
+</head>
+<body>
+ <canvas id="starCanvas"></canvas>
+  <h1>🧩 Rompecabezas del Amor 💖</h1>
+
+  <button id="resetPuzzle">🔄 Reiniciar</button>
+  <button id="viewImage">👀 Ver Imagen</button>
+  <button id="backButton">⬅️ Volver</button>
+
+  <div id="puzzleBoard"></div>
+
+  <!-- Modal para ver imagen completa -->
+  <div id="imageModal">
+    <span class="close">&times;</span>
+    <img id="fullImage" src="" alt="Imagen completa">
+  </div>
+
+  <script>
+    const puzzleBoard = document.getElementById('puzzleBoard');
+    const gridSize = 6;
+    const totalPieces = gridSize * gridSize;
+    const imageSrc = 'love.png';
+
+    function startPuzzle() {
+      puzzleBoard.innerHTML = '';
+      const shuffled = [...Array(totalPieces).keys()].sort(() => Math.random() - 0.5);
+
+      shuffled.forEach((shuffledIndex) => {
+        const piece = document.createElement('div');
+        piece.className = 'puzzle-piece';
+        piece.style.backgroundImage = `url(${imageSrc})`;
+        piece.style.backgroundSize = `${gridSize * 100}px ${gridSize * 100}px`;
+        piece.style.backgroundPosition = `-${(shuffledIndex % gridSize) * 100}px -${Math.floor(shuffledIndex / gridSize) * 100}px`;
+
+        piece.draggable = true;
+        piece.dataset.correct = shuffledIndex;
+
+        piece.addEventListener('dragstart', dragStart);
+        piece.addEventListener('dragover', e => e.preventDefault());
+        piece.addEventListener('drop', dropPiece);
+
+        puzzleBoard.appendChild(piece);
+      });
+    }
+
+    let draggedPiece = null;
+
+    function dragStart(event) {
+      draggedPiece = event.target;
+    }
+
+    function dropPiece(event) {
+      if (draggedPiece && event.target !== draggedPiece) {
+        const tempPos = draggedPiece.style.backgroundPosition;
+        draggedPiece.style.backgroundPosition = event.target.style.backgroundPosition;
+        event.target.style.backgroundPosition = tempPos;
+
+        const tempCorrect = draggedPiece.dataset.correct;
+        draggedPiece.dataset.correct = event.target.dataset.correct;
+        event.target.dataset.correct = tempCorrect;
+
+        checkCompletion();
+      }
+    }
+
+    function checkCompletion() {
+      const pieces = document.querySelectorAll('.puzzle-piece');
+      let isComplete = true;
+
+      pieces.forEach((piece, index) => {
+        if (parseInt(piece.dataset.correct) !== index) {
+          isComplete = false;
+        }
+      });
+
+      if (isComplete) {
+        console.log("✔️ Rompecabezas completo (sin mensaje visual).");
+      }
+    }
+
+    document.getElementById('viewImage').addEventListener('click', () => {
+      const modal = document.getElementById('imageModal');
+      const fullImage = document.getElementById('fullImage');
+      fullImage.src = imageSrc;
+      modal.style.display = 'flex';
+    });
+
+    document.querySelector('.close').addEventListener('click', () => {
+      document.getElementById('imageModal').style.display = 'none';
+    });
+
+    document.getElementById('resetPuzzle').addEventListener('click', startPuzzle);
+
+    document.getElementById('backButton').addEventListener('click', () => {
+      window.location.href = 'pagpri.html';
+    });
+
+    window.onload = startPuzzle;
+    // ✨ Estrellas brillantes
+const canvas = document.getElementById("starCanvas");
+const ctx = canvas.getContext("2d");
+
+let stars = [];
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  createStars();
+}
+
+window.addEventListener("resize", resizeCanvas);
+
+function createStars() {
+  stars = [];
+  const count = Math.floor((canvas.width * canvas.height) / 1200);
+  for (let i = 0; i < count; i++) {
+    stars.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      size: Math.random() * 3 + 1.5, // Tamaño más brillante
+      baseOpacity: Math.random() * 0.5 + 0.6,
+      speed: Math.random() * 0.015 + 0.003,
+      angle: Math.random() * Math.PI * 2,
+      driftX: (Math.random() - 0.5) * 0.3,
+      driftY: (Math.random() - 0.5) * 0.3
+    });
+  }
+}
+
+function drawStars() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  stars.forEach(star => {
+    star.angle += star.speed;
+    star.x += star.driftX;
+    star.y += star.driftY;
+
+    // 🌠 Reaparece por el otro lado si sale
+    if (star.x < 0) star.x = canvas.width;
+    if (star.x > canvas.width) star.x = 0;
+    if (star.y < 0) star.y = canvas.height;
+    if (star.y > canvas.height) star.y = 0;
+
+    const opacity = star.baseOpacity + Math.sin(star.angle) * 0.5;
+    ctx.globalAlpha = Math.min(Math.max(opacity, 0), 1);
+
+    // 🌌 Gradiente brillante para las estrellas
+    const gradient = ctx.createRadialGradient(
+      star.x, star.y, 0,
+      star.x, star.y, star.size
+    );
+    gradient.addColorStop(0, "rgba(255, 255, 255, 1)");
+    gradient.addColorStop(0.5, "rgba(255, 255, 255, 0.5)");
+    gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+
+    ctx.beginPath();
+    ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+    ctx.fillStyle = gradient;
+    ctx.shadowBlur = 30;
+    ctx.shadowColor = "white";
+    ctx.fill();
+  });
+  requestAnimationFrame(drawStars);
+}
+
+resizeCanvas();
+drawStars();
+
+  </script>
+</body>
+</html>
